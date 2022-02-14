@@ -1,0 +1,1 @@
+select count(distinct dispatching_base_num) from  `clever-grid-339211.trips_data_all.fhv_external_table`;

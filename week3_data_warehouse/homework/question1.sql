@@ -1,0 +1,1 @@
+SELECT count(*) FROM `clever-grid-339211.trips_data_all.fhv_external_table`;
