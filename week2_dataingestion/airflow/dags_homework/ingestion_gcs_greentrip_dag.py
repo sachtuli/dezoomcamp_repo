@@ -11,13 +11,13 @@ AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 BUCKET = os.environ.get("GCP_GCS_BUCKET")
 
-dataset_file = "yellow_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.csv"
+dataset_file = "green_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.csv"
 dataset_url = f"https://s3.amazonaws.com/nyc-tlc/trip+data/{dataset_file}"
-OUTPUT_FILE_TEMPLATE = 'output_{{ execution_date.strftime(\'%Y-%m\') }}.csv'
-PARQUET_FILE = 'output_{{ execution_date.strftime(\'%Y-%m\') }}.parquet'
+OUTPUT_FILE_TEMPLATE = 'green_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.csv'
+PARQUET_FILE = 'green_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.parquet'
 PATH_PARQUET_FILE = AIRFLOW_HOME
 
-TABLE_NAME_TEMPLATE = 'yellow_taxi_{{ execution_date.strftime(\'%Y-%m\') }}'
+TABLE_NAME_TEMPLATE = 'green_taxi_{{ execution_date.strftime(\'%Y-%m\') }}'
 
 default_args = {
     "owner": "airflow",
@@ -26,9 +26,10 @@ default_args = {
 }
 
 with DAG(
-    dag_id="ingestiondag_V1",
+    dag_id="greentrip_taxi",
     default_args=default_args,
     start_date=datetime(2019, 1, 1),
+    end_date=datetime(2021, 1, 1),
     schedule_interval="0 6 2 * *",
     catchup=True,
     max_active_runs=3
@@ -37,7 +38,7 @@ with DAG(
     download_dataset_task = BashOperator(
         task_id="download_data",
         retries=1,
-        bash_command=f"curl -sS {dataset_url} > {AIRFLOW_HOME}/{OUTPUT_FILE_TEMPLATE}"
+        bash_command=f"curl -sSL {dataset_url} > {AIRFLOW_HOME}/{OUTPUT_FILE_TEMPLATE}"
     )
 
     format_to_parquet_task = PythonOperator(
@@ -55,7 +56,7 @@ with DAG(
         python_callable=upload_to_gcs,
         op_kwargs={
             "bucket": BUCKET,
-            "object_name": f"yellow_tripdata/{PARQUET_FILE}",
+            "object_name": f"raw/{PARQUET_FILE}",
             "local_file": f"{PATH_PARQUET_FILE}/{PARQUET_FILE}",
         },
     )
