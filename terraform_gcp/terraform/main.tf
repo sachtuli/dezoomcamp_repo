@@ -16,34 +16,52 @@ provider "google" {
 
 # Data Lake Bucket
 # Ref: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket
-resource "google_storage_bucket" "data-lake-bucket" {
-  name          = "${local.data_lake_bucket}_${var.project}" # Concatenating DL bucket & Project name for unique naming
-  location      = var.region
+# resource "google_storage_bucket" "data-lake-bucket" {
+#   name          = "${local.data_lake_bucket}_${var.project}" # Concatenating DL bucket & Project name for unique naming
+#   location      = var.region
 
-  # Optional, but recommended settings:
-  storage_class = var.storage_class
-  uniform_bucket_level_access = true
+#   # Optional, but recommended settings:
+#   storage_class = var.storage_class
+#   uniform_bucket_level_access = true
 
-  versioning {
-    enabled     = true
-  }
+#   versioning {
+#     enabled     = true
+#   }
 
-  lifecycle_rule {
-    action {
-      type = "Delete"
-    }
-    condition {
-      age = 30  // days
-    }
-  }
+#   lifecycle_rule {
+#     action {
+#       type = "Delete"
+#     }
+#     condition {
+#       age = 30  // days
+#     }
+#   }
 
-  force_destroy = true
-}
+#   force_destroy = true
+# }
 
 # DWH
 # Ref: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_dataset
-resource "google_bigquery_dataset" "dataset" {
-  dataset_id = var.BQ_DATASET
+# resource "google_bigquery_dataset" "dataset" {
+#   dataset_id = var.BQ_DATASET
+#   project    = var.project
+#   location   = var.region
+# }
+
+resource "google_bigquery_dataset" "dbt_dataset1"  {
+  dataset_id = "staging"
+  project    = var.project
+  location   = var.region
+}
+
+resource "google_bigquery_dataset" "dbt_dataset2" {
+  dataset_id = "production"
+  project    = var.project
+  location   = var.region
+}
+
+resource "google_bigquery_dataset" "dbt_dataset3" {
+  dataset_id = "dbt_stuli "
   project    = var.project
   location   = var.region
 }
